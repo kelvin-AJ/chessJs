@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess</title>
+    <script defer src="game.js"></script>
+    <style>
+        body{
+            background-color: #262626;
+            margin: 0px;
+            color: rgba(255, 255, 255, 0.422);
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            display: grid;
+            align-items: center;
+            justify-items: center;
+            height: 100vh;
+            overflow-x: hidden;
+           
+        }
+        img, #board{
+            transition: all 1s;
+        }
+        #board{
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            background-color: aliceblue;
+            height: max-content;
+            width: fit-content;
+        }
+        .black-playing #board{
+             transform: rotateZ(90deg);
+        }
+        
+        .white-playing #board{
+            transform: rotateZ(270deg);
+        }
+        #board .square{
+            height: 5rem;
+            width: 5rem;
+            color: black;
+            background-position: center;
+            background-size: contain;
+            display: grid;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .dark{
+            background: url(img/dark_square.png), #efefef5b;
+            
+        }
+        .light{
+            background: url(img/light_square.png), #efefef57;
+        }
+        img{
+            max-width: 80%;
+           
+            cursor: grab;
+        }
+        img:active{
+            transition: all 0.3s;
+            cursor: grabbing;
+            opacity: 0.5;
+        }
+        .white-playing img{
+             transform: rotateZ(90deg);
+        }
+        .black-playing img{
+            transform: rotateZ(270deg);
+        }
+        .active-square{
+            background-blend-mode: lighten;
+        }
+        #flip{
+            padding: 0.5rem;
+            color: white;
+            background-color: black;
+            border-radius: 3px;
+        }
+        #flip:active{
+            transition: all 0.3s;
+            transform: translateY(1rem);
+        }
+    </style>
+</head>
+<body class="white-playing">
+    <h3 id="message">White to Play</h3>
+    <h4 id="message1"></h4>
+    <div id="board">
+        <!-- <div class="square dark"></div> -->
+    </div>
+    <button type="button" id="flip">flip board🔄</button>
+</body>
+</html>
