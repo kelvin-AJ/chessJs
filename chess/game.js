@@ -17,13 +17,16 @@ const names = {
     "B" : "bishop",
     "p" : "pawn"
 }
-let checkForMate = false;
 
 
 // ------DOM
 const visualBoard = document.querySelector("#board");
 const flipBtn = document.querySelector("#flip");
 const body = document.querySelector("body");
+const message = document.querySelector("#message");
+const message1 = document.querySelector("#message1");
+const mateBtn = document.querySelector("#mate");
+
 
 class Square {
     #row;
@@ -56,7 +59,7 @@ class Square {
         return this.occupant;
     }
     removeOccupant(){
-        if(!this.occupant)console.log("occupant removed")
+        // if(!this.occupant)console.log("occupant removed")
         this.occupant = undefined;
         this.isOccupied = false;
         return this;
@@ -96,7 +99,9 @@ const gameBoard = new Board();
 // *********MOVES********* //
 /////////////////////////////////////////////
 
-let takenPiece;
+let takenPieces = [];
+const moveCentral = [];
+
 class Move {
     #square;
     #piece;
@@ -123,14 +128,19 @@ class Move {
 
     makeMove(test = false, start = false){
         // Standard stuff
-       const sq =  (this.#square.setOccupant(this.#piece))
-       if(!test)console.log(sq);
-       takenPiece = sq.getOccupant();
+        if(!test)takenPieces.push(this.#square.getOccupant());
+        this.#square.setOccupant(this.#piece);
+        
+        if(takenPieces[takenPieces.length -1]){
+            
+            // Filter takenPieces
+            takenPieces = takenPieces.filter(piece => piece);
+            console.log(takenPieces);
+            // this._renderTakenPieces(takenPieces)
 
+        }
         this.#piece.setFormerPosition(this.#piece.getPosition());
         this.#piece.setFormerMove(new Move(this.#piece, this.#piece.getFormerPosition()));
-
-
         // Business on Piece
         if(!start)this.#piece.getFormerPosition()?.removeOccupant();
         this.#piece.setPosition(this.#square);
@@ -138,13 +148,18 @@ class Move {
         if(!this.#piece.getFormerPosition().equals(this.#square.getSquareArr())){
             if(!test)this.#piece.hasMoved = true;
         };
+        moveCentral.push(this);
         return this;
     }
 
     undoMove(){
-        this.getSquare().setOccupant(takenPiece);
         const formerMove = this.#piece.getFormerMove();
-        formerMove.makeMove(true);
+        formerMove.makeMove();
+        takenPieces = takenPieces.filter(piece => piece);
+        const takenPiece = takenPieces.splice(-1, 1);
+        this.getSquare().setOccupant(takenPiece);
+
+        return formerMove;
     }
 
     makeMoveUI() {
@@ -162,8 +177,14 @@ class Move {
         domCurPosition.append(domPrevPosition.querySelector("img"));
         
     }
+
+    _renderTakenPieces(takenPieces) {
+        takenPieces.forEach(piece => {
+            console.log(names[piece.getType()]);
+        })
+    }
     equals(move) {
-        return  this.notation == move.notation
+        return  this.notation == move.notation;
     }
     getMove() {
         return this;
@@ -180,7 +201,6 @@ class Castle extends Move {
         this.notation == "O-O-O"
     }
     makeMove() {
-        console.log("castle move")
         this.getPiece().setFormerPosition(this.getPiece().getPosition());
         this.getPiece().getFormerPosition().removeOccupant();
         if(!this.getPiece().getFormerPosition().equals(this.getSquare().getSquareArr())){
@@ -201,8 +221,7 @@ class Castle extends Move {
             const [row, col] = this.getSquare().getSquareArr();
             rookMove = new Move(this.#rook, gameBoard.getSquarefromBoard(row, col + 1))
         }
-        rookMove.makeMove();
-        rookMove.makeMoveUI();
+        rookMove.makeMove().makeMoveUI();
 
         return this;
     }
@@ -308,29 +327,26 @@ class King extends Piece {
         }
 
         // CASTLING
-        if(!checkForMate){
 
-            if(row == 1 || row == 8){
-                const sB = [
-                    gameBoard.getSquarefromBoard(row, col + 1),
-                    gameBoard.getSquarefromBoard(row, col + 2),
-                    gameBoard.getSquarefromBoard(row, col + 3),
-                    gameBoard.getSquarefromBoard(row, col - 1),
-                    gameBoard.getSquarefromBoard(row, col - 2),
-                    gameBoard.getSquarefromBoard(row, col - 3),
-                    gameBoard.getSquarefromBoard(row, col - 4),
-                ]
 
-                if((!sB[0].isOccupied) && (!sB[1].isOccupied) && (!sB[2].occupant.hasMoved)){
-                    console.log("castle move detected")
-                    naturalMoves.push(new Castle(this, sB[2].occupant, sB[1]))
-                }
-                if((!sB[3].isOccupied) && (!sB[4].isOccupied) && (!sB[5].isOccupied) && (!sB[6].occupant.hasMoved)){
-                    console.log("castle move detected")
-                    naturalMoves.push(new Castle(this, sB[6].occupant, sB[4]))
-                }
-            
+        if(row == 1 || row == 8){
+            const sB = [
+                gameBoard.getSquarefromBoard(row, col + 1),
+                gameBoard.getSquarefromBoard(row, col + 2),
+                gameBoard.getSquarefromBoard(row, col + 3),
+                gameBoard.getSquarefromBoard(row, col - 1),
+                gameBoard.getSquarefromBoard(row, col - 2),
+                gameBoard.getSquarefromBoard(row, col - 3),
+                gameBoard.getSquarefromBoard(row, col - 4),
+            ]
+
+            if((!sB[0].isOccupied) && (!sB[1].isOccupied) && (!sB[2].occupant.hasMoved)){
+                naturalMoves.push(new Castle(this, sB[2].occupant, sB[1]))
             }
+            if((!sB[3].isOccupied) && (!sB[4].isOccupied) && (!sB[5].isOccupied) && (!sB[6].occupant.hasMoved)){
+                naturalMoves.push(new Castle(this, sB[6].occupant, sB[4]))
+            }
+        
         }
         return  naturalMoves;
     }
@@ -418,7 +434,7 @@ class Queen extends Piece {
         for(let [i,j] = [row - 1, col - 1]; (i > 0) && (j > 0); i-- && j--){
             if(!gameBoard.getSquarefromBoard(i, j).isOccupied){
                 naturalMoves.push(new Move(this, gameBoard.getSquarefromBoard(i, j)));
-            }else if(gameBoard.getSquarefromBoard(i, j).occupant.getColor() != this.getColor()){
+            }else if(gameBoard.getSquarefromBoard(i, j).occupant?.getColor() != this.getColor()){
                 naturalMoves.push(new Move(this, gameBoard.getSquarefromBoard(i, j)));
                 break;
             }else break;
@@ -730,7 +746,7 @@ class Game {
             }
 
             let html;
-            if(sqr.isOccupied){
+            if(sqr.isOccupied && (sqr.occupant != null)){
                 html = `
                 <div class="square ${squareColor()}" data-id="[${sqr.getSquareArr()}]">
                     <img id="${sqr.occupant.id}" src="img/${sqr.occupant.getColor()}_${names[sqr.occupant.getType()]}_png_shadow_128px.png">
@@ -751,7 +767,7 @@ class Game {
     _switchPlayer() {
         this.currentPlayer == W? this.currentPlayer = B: this.currentPlayer = W;
 
-
+        message.textContent = `${this.currentPlayer == W? "White" : "Black"} to Play`
     }
 
     _activateBoard() {
@@ -766,18 +782,13 @@ class Game {
             if(clicked.classList.contains("active-square")){
                 const moveTosqr = JSON.parse(clicked.dataset.id);
                 const moveTo = activeMoves.find(mov => mov.getSquare().equals(moveTosqr))
-                moveTo.makeMove();
-
-                // FAST
-                moveTo.makeMoveUI();
-                // SLOW
-                // this.updateUI(gameBoard.getBoard());
+                moveTo.makeMove().makeMoveUI();
                 this._switchPlayer();
+                
 
                 if(!moveTo.isCastle){
-                    this.checkValidation();
                     if(this.checkValidation()[1]){
-                        console.log(this._checkMateValidation())
+                        message1.textContent =`${this.checkValidation()[0] == B ? "Black" : "White"}'s King is on check. and sorry but I don't know if it's a mate`
                     }
                 }
                 
@@ -838,20 +849,18 @@ class Game {
 
                 const move = generateMove(pieceId ,square.dataset.id);
                 if(move && move.getPiece().getColor() == this.currentPlayer){
-                    move.makeMove();
-                    move.makeMoveUI();
+                    move.makeMove().makeMoveUI();
                     this._switchPlayer();
                     if(!move.isCastle){
-                        this.checkValidation();
                         if(this.checkValidation()[1]){
-                            console.log(this._checkMateValidation())
+                            message1.textContent =`${this.checkValidation()[0] == B ? "Black" : "White"}'s King is on check. and sorry but I don't know if it's a mate`
                         }
                     }
                 }
 
-            })
-        })
-    }
+            });
+        });
+    };
 
 
 
@@ -882,30 +891,8 @@ class Game {
 
         return [king, check]
     }
-
-    _checkMateValidation() {
-
-        const globalPossibleMoves = _ =>  {
-            return Object.entries(this.inBoardPieces).flatMap(([id,piece]) => piece.getPossibleMoves());
-        }
-        let [color, _] = game.checkValidation();
-        let possibleMoves = globalPossibleMoves();
-        possibleMoves = possibleMoves.filter(move => move.getPiece().getColor() == color);
-
-        const mate = possibleMoves.every(move => {
-            let check = false;
-            
-            move.makeMove(true);
-            [color, check] = game.checkValidation();
-            move.undoMove();
-
-            return check;
-        });
-        return mate;
-    }
-
     gameOver(color) {
-        console.log(`${color == W? "White" : "Black"} wins`)
+        console.log(`${color == W ? "White" : "Black"} wins`)
     }
 }
 

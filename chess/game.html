@@ -76,22 +76,58 @@
         .active-square{
             background-blend-mode: lighten;
         }
-        #flip{
+        button{
             padding: 0.5rem;
             color: white;
             background-color: black;
             border-radius: 3px;
         }
-        #flip:active{
+        button:active{
             transition: all 0.3s;
             transform: translateY(1rem);
+        }
+        button.inactive{
+            background-color: #262626;
+            color: #606060;
+            cursor: not-allowed;
+        }
+        button.inactive:active{
+            transition: none;
+            transform: none;
+        }
+        h3{
+            position: fixed;
+            top: 1px;
+        }
+        .takes{
+            position: fixed;
+            left: 5px;
+        }
+        .takes-container{
+            background-color: #606060;
+            width: 5rem;
+            height: 2rem;
+            margin: 0.9rem;
+            border-radius: 0.3rem;
         }
     </style>
 </head>
 <body class="white-playing">
+    <div class="messages">
+        <h3 id="message">White to Play</h3>
+        <h4 id="message1"></h4>
+    </div>
     <div id="board">
         <!-- <div class="square dark"></div> -->
     </div>
-    <button type="button" id="flip">flip board🔄</button>
+    <div class="takes">
+        <div class="takes-container"></div>
+        <div class="takes-container"></div>
+    </div>
+    <div>
+        <button type="button" class="inactive" id="mate">Mate</button>
+        <button type="button" id="flip">flip board🔄</button>
+        <button type="button" id="undo">undo</button>
+    </div>
 </body>
 </html>
