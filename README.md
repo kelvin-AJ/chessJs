@@ -13,3 +13,4 @@ Cannot identify checkmate and pins yet
 Feel free to pull and make changes
 
 ## Preview
+https://kelvin-aj.github.io/chessJs/chess/game.html
