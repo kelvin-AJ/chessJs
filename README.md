@@ -7,5 +7,9 @@ The JavaScript is object oriented: Classes and methods are easy to understand an
 
 
 
-Limitations
+## Limitations
 Cannot identify checkmate and pins yet
+
+Feel free to pull and make changes
+
+## Preview
